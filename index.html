@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Medical Terminology Quiz</title> 
+  <script src="https://cdn.tailwindcss.com"></script> 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"> 
+  <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #E5E4E2;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            
+            padding: 20px;
+        }
+      
+        .option-button {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+        }
+        .option-button:hover:not(.answered) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        /* Icon styles */
+        .feedback-icon {
+            width: 24px;
+            height: 24px;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .feedback-icon-visible {
+            opacity: 1;
+        }
+    </style> 
+ </head> 
+ <body> 
+  <div id="quiz-container" class="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-6 md:p-10"> <!-- Header: Score and Progress --> 
+   <div class="flex justify-between items-center mb-6 border-b pb-4 border-gray-200"> 
+    <h1 class="text-3xl font-bold text-blue-600">Terminology Quiz Lec-7</h1> 
+    <div class="text-lg font-semibold text-gray-700">
+      Score: <span id="score-display" class="text-green-600">0</span> / <span id="total-questions">30</span> 
+    </div> 
+   </div> <!-- Question Display --> 
+   <div id="question-card" class="mb-8 min-h-24"> 
+    <p class="text-2xl font-semibold text-gray-800 mb-4" id="question-text"> Loading question... </p> 
+    <div id="options-container" class="space-y-4"> 
+    </div> 
+   </div> <!-- Navigation and Progress --> 
+   <div class="flex justify-between items-center pt-4 border-t border-gray-200"> 
+    <div class="text-lg text-gray-600 font-medium">
+      Question <span id="current-q-number">0</span> of 30 
+    </div> <button id="next-button" onclick="nextQuestion()" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition duration-150 ease-in-out disabled:bg-gray-400" disabled> Next Question </button> 
+   </div> <!-- Final Score Modal --> 
+   <div id="final-score-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50"> 
+    <div class="bg-white rounded-xl p-8 text-center shadow-2xl w-full max-w-sm"> 
+     <h2 class="text-4xl font-extrabold text-blue-600 mb-4">Quiz Complete!</h2> 
+     <p class="text-xl text-gray-700 mb-6">Your final score is:</p> 
+     <p class="text-6xl font-black text-green-700 mb-8" id="final-score-text">0 / 20</p> <button onclick="window.location.reload()" class="px-6 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition duration-150"> Start Over </button> 
+    </div> 
+   </div> 
+  </div> 
+  <script>
+      
+        const quizData = [
+          
+          
+  {
+    "question": "Parkinson’s Disease is an example of: ",
+    "options": [
+      "A. An acronym",
+      "B. An abbreviation",
+      "C. An eponym",
+      "D. A synonym",
+      "E. A suffix"
+    ],
+    "answer": "C. An eponym"
+  },
+  {
+    "question": "What is the medical term for the accumulation of fluid in the peritoneal cavity? ",
+    "options": [
+      "A. Edema",
+      "B. Ascites",
+      "C. Pleurisy",
+      "D. Hydrocephalus",
+      "E. Ischemia"
+    ],
+    "answer": "B. Ascites"
+  },
+  {
+    "question": "The medical abbreviation \"stat\" means: ",
+    "options": [
+      "A. As soon as possible",
+      "B. Only at night",
+      "C. Before meals",
+      "D. Every day",
+      "E. At once / immediately"
+    ],
+    "answer": "E. At once / immediately"
+  },
+  {
+    "question": "Which term describes the yellowish discoloration of the skin and sclera due to hyperbilirubinemia? ",
+    "options": [
+      "A. Cyanosis",
+      "B. Erythema",
+      "C. Pallor",
+      "D. Jaundice",
+      "E. Urticaria"
+    ],
+    "answer": "D. Jaundice"
+  },
+  {
+    "question": "Which term means \"a narrowed aperture or passage\"? ",
+    "options": [
+      "A. Stenosis",
+      "B. Incompetence",
+      "C. Dilatation",
+      "D. Aneurysm",
+      "E. Hernia"
+    ],
+    "answer": "A. Stenosis"
+  },
+  {
+    "question": "The suffix (-iasis) generally indicates: ",
+    "options": [
+      "A. Inflammation",
+      "B. A disease producing condition",
+      "C. Surgical removal",
+      "D. Formation of cells",
+      "E. Disintegration of tissue"
+    ],
+    "answer": "B. A disease producing condition"
+  },
+  {
+    "question": "The amelioration or disappearance of symptoms in a chronic disease is known as: ",
+    "options": [
+      "A. Exacerbation",
+      "B. Genesis",
+      "C. Relapse",
+      "D. Recurrence",
+      "E. Remission"
+    ],
+    "answer": "E. Remission"
+  },
+  {
+    "question": "\"Coarctation\" is defined as which of the following? ",
+    "options": [
+      "A. The expansion of a vessel wall",
+      "B. The rupture of a vessel",
+      "C. The compression of the wall of a vessel",
+      "D. The inflammation of a vessel",
+      "E. The formation of stones in a vessel"
+    ],
+    "answer": "C. The compression of the wall of a vessel"
+  },
+  {
+    "question": "Taking a live tissue sample for pathological study is called: ",
+    "options": [
+      "A. Biopsy",
+      "B. Autopsy",
+      "C. Necropsy",
+      "D. Necrosis",
+      "E. Lysis"
+    ],
+    "answer": "A. Biopsy"
+  },
+  {
+    "question": "What is the definition of \"Lysis\"? ",
+    "options": [
+      "A. The process of formation",
+      "B. The process of disintegration or dissolution",
+      "C. The process of replication",
+      "D. The process of clotting",
+      "E. The process of narrowing"
+    ],
+    "answer": "B. The process of disintegration or dissolution"
+  },
+  {
+    "question": "A fundamental mental derangement characterized by defective or lost contact with reality is called: ",
+    "options": [
+      "A. Neurosis",
+      "B. Anxiety",
+      "C. Phobia",
+      "D. Psychosis",
+      "E. Obsession"
+    ],
+    "answer": "D. Psychosis"
+  },
+  {
+    "question": "Syncope is another term for: ",
+    "options": [
+      "A. A seizure",
+      "B. A stroke",
+      "C. A heart attack",
+      "D. A fainting attack",
+      "E. An allergic reaction"
+    ],
+    "answer": "D. A fainting attack"
+  },
+  {
+    "question": "What is the medical term for an itching sensation of the skin? ",
+    "options": [
+      "A. Pruritis",
+      "B. Psoriasis",
+      "C. Purpura",
+      "D. Pyrosis",
+      "E. Alopecia"
+    ],
+    "answer": "A. Pruritis"
+  },
+  {
+    "question": "Melaena is defined as: ",
+    "options": [
+      "A. Vomiting bright red blood",
+      "B. Bleeding from the nose",
+      "C. Excessive urination",
+      "D. Blood in the urine",
+      "E. Passage of black tarry stools due to upper GI bleeding"
+    ],
+    "answer": "E. Passage of black tarry stools due to upper GI bleeding"
+  },
+  {
+    "question": "Ischemia is defined as: ",
+    "options": [
+      "A. An increase in blood pressure",
+      "B. A bacterial infection of the blood",
+      "C. A reduction in blood supply to an organ or tissue",
+      "D. The complete absence of blood flow",
+      "E. An accumulation of fluid in the abdomen"
+    ],
+    "answer": "C. A reduction in blood supply to an organ or tissue"
+  },
+  {
+    "question": "Necrosis is defined as: ",
+    "options": [
+      "A. Postmortem examination",
+      "B. Pathological localized death of tissue",
+      "C. Natural cell death",
+      "D. Tissue regeneration",
+      "E. Formation of new tissue"
+    ],
+    "answer": "B. Pathological localized death of tissue"
+  },
+  {
+    "question": "Erythropoesis is the formation of: ",
+    "options": [
+      "A. White blood cells",
+      "B. Platelets",
+      "C. Red blood cells",
+      "D. Bone marrow",
+      "E. Spermatozoa"
+    ],
+    "answer": "C. Red blood cells"
+  },
+  {
+    "question": "Which suffix indicates a process of formation? ",
+    "options": [
+      "A. -lysis",
+      "B. -poesis",
+      "C. -osis",
+      "D. -itis",
+      "E. -stenosis"
+    ],
+    "answer": "B. -poesis"
+  },
+  {
+    "question": "Which condition is defined as stones in the biliary passages? ",
+    "options": [
+      "A. Urolithiasis",
+      "B. Nephrolithiasis",
+      "C. Cholelithiasis",
+      "D. Cholecystitis",
+      "E. Appendicitis"
+    ],
+    "answer": "C. Cholelithiasis"
+  },
+  {
+    "question": "The protrusion of an organ or part through connective tissue or the wall of a cavity is known as: ",
+    "options": [
+      "A. Hernia",
+      "B. Fistula",
+      "C. Diverticulum",
+      "D. Prolapse",
+      "E. Laceration"
+    ],
+    "answer": "A. Hernia"
+  },
+  {
+    "question": "What is the term for the spitting of blood with expectoration? ",
+    "options": [
+      "A. Hematemesis",
+      "B. Hemoptysis",
+      "C. Epistaxis",
+      "D. Hemorrhage",
+      "E. Melena"
+    ],
+    "answer": "B. Hemoptysis"
+  },
+  {
+    "question": "An irregular wound or tear caused by severe blunt trauma is called a: ",
+    "options": [
+      "A. Incision",
+      "B. Biopsy",
+      "C. Abrasion",
+      "D. Contusion",
+      "E. Laceration"
+    ],
+    "answer": "E. Laceration"
+  },
+  {
+    "question": "Which of the following is considered a Neurosis? ",
+    "options": [
+      "A. Mania",
+      "B. Endogenous depression",
+      "C. Anxiety states",
+      "D. Schizophrenia",
+      "E. Dementia"
+    ],
+    "answer": "C. Anxiety states"
+  },
+  {
+    "question": "Alopecia is defined as: ",
+    "options": [
+      "A. Loss of hair",
+      "B. Excessive hair growth",
+      "C. Graying of hair",
+      "D. Infection of the hair follicle",
+      "E. Yellowing of the eyes"
+    ],
+    "answer": "A. Loss of hair"
+  },
+  {
+    "question": "The suffix (-osis) denotes: ",
+    "options": [
+      "A. A tumor",
+      "B. An acute infection",
+      "C. A decrease in number",
+      "D. An abnormal status of an organ or tissue",
+      "E. A surgical opening"
+    ],
+    "answer": "D. An abnormal status of an organ or tissue"
+  },
+  {
+    "question": "Epistaxis refers to: ",
+    "options": [
+      "A. Bleeding from the gums",
+      "B. Coughing up blood",
+      "C. Nose bleeding",
+      "D. Ear bleeding",
+      "E. Rectal bleeding"
+    ],
+    "answer": "C. Nose bleeding"
+  },
+  {
+    "question": "What is an \"Exacerbation\"? ",
+    "options": [
+      "A. The complete cure of a disease",
+      "B. An active episode of a chronic disease",
+      "C. The disappearance of symptoms",
+      "D. The initial onset of a disease",
+      "E. A generic drug name"
+    ],
+    "answer": "B. An active episode of a chronic disease"
+  },
+  {
+    "question": "What does the acronym \"COPD\" stand for? ",
+    "options": [
+      "A. Chronic Obstructive Pulmonary Disease",
+      "B. Chronic Oxygen Pulmonary Disease",
+      "C. Cardiac Obstructive Pulmonary Disorder",
+      "D. Central Obstructive Pulmonary Disease",
+      "E. Chronic Obstructive Pediatric Disorder"
+    ],
+    "answer": "A. Chronic Obstructive Pulmonary Disease"
+  },
+  {
+    "question": "Urticaria is characterized by which combination of symptoms? ",
+    "options": [
+      "A. Pallor, pain, and bleeding",
+      "B. Jaundice, fever, and nausea",
+      "C. Cyanosis, coldness, and numbness",
+      "D. Erythema, swelling, and pruritis",
+      "E. Coughing, wheezing, and fever"
+    ],
+    "answer": "D. Erythema, swelling, and pruritis"
+  },
+  {
+    "question": "The suffix (-itis) indicates: ",
+    "options": [
+      "A. Formation",
+      "B. Softening",
+      "C. Abnormal status",
+      "D. Disintegration",
+      "E. Inflammation"
+    ],
+    "answer": "E. Inflammation"
+  }
+
+
+          
+
+];
+
+         let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+        const totalQuestions = quizData.length;
+
+        // --- DOM ELEMENTS ---
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const currentQNumber = document.getElementById('current-q-number');
+        const nextButton = document.getElementById('next-button');
+        const finalScoreModal = document.getElementById('final-score-modal');
+        const finalScoreText = document.getElementById('final-score-text');
+
+        // --- UTILITY ICONS (Inline SVG for instant rendering) ---
+        const correctIconSVG = `
+            <svg class="feedback-icon text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>`;
+        const incorrectIconSVG = `
+            <svg class="feedback-icon text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>`;
+        
+        // --- QUIZ LOGIC FUNCTIONS ---
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= totalQuestions) {
+                showFinalScore();
+                return;
+            }
+
+            const currentQ = quizData[currentQuestionIndex];
+            answered = false;
+            nextButton.disabled = true;
+            optionsContainer.innerHTML = '';
+
+            questionText.textContent = currentQ.question;
+            currentQNumber.textContent = currentQuestionIndex + 1;
+
+            currentQ.options.forEach((optionText, index) => {
+                const optionButton = document.createElement('button');
+                optionButton.className = 'option-button w-full p-4 bg-gray-100 rounded-xl font-medium text-gray-700 shadow-sm border border-gray-200';
+                optionButton.setAttribute('data-option', optionText);
+                optionButton.innerHTML = `
+                    <span class="flex-1">${optionText}</span>
+                    <span class="feedback-placeholder"></span>
+                `;
+                optionButton.onclick = () => selectOption(optionText, optionButton);
+                optionsContainer.appendChild(optionButton);
+            });
+        }
+
+        function selectOption(selectedOptionText, selectedButton) {
+            if (answered) {
+                return; // Prevent multiple clicks on the current question
+            }
+            answered = true;
+            nextButton.disabled = false;
+            
+            const currentQ = quizData[currentQuestionIndex];
+            const isCorrect = selectedOptionText === currentQ.answer;
+
+            if (isCorrect) {
+                score++;
+                scoreDisplay.textContent = score;
+            }
+
+            showFeedback(currentQ.answer, selectedButton);
+        }
+
+        function showFeedback(correctAnswer, selectedButton) {
+            const buttons = optionsContainer.querySelectorAll('.option-button');
+            
+            buttons.forEach(button => {
+                const optionText = button.getAttribute('data-option');
+                const isCorrect = optionText === correctAnswer;
+                const isSelected = button === selectedButton;
+
+                // 1. Mark the button as answered (disables hover/interaction)
+                button.classList.add('answered');
+                button.disabled = true;
+
+                // 2. Add visual feedback (Telegram Quiz Style)
+                const iconPlaceholder = button.querySelector('.feedback-placeholder');
+                
+                if (isCorrect) {
+                    // Always mark the correct answer green
+                    button.classList.add('bg-green-100', 'border-green-400');
+                    iconPlaceholder.innerHTML = correctIconSVG;
+                    iconPlaceholder.querySelector('.feedback-icon').classList.add('feedback-icon-visible');
+                    button.classList.remove('bg-gray-100');
+                } else if (isSelected) {
+                    // Mark the user's incorrect choice red
+                    button.classList.add('bg-red-100', 'border-red-400');
+                    iconPlaceholder.innerHTML = incorrectIconSVG;
+                    iconPlaceholder.querySelector('.feedback-icon').classList.add('feedback-icon-visible');
+                    button.classList.remove('bg-gray-100');
+                }
+            });
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function showFinalScore() {
+            finalScoreText.textContent = `${score} / ${totalQuestions}`;
+            finalScoreModal.classList.remove('hidden');
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            document.getElementById('total-questions').textContent = totalQuestions;
+            loadQuestion();
+        };
+
+    </script> 
+ 
+</body></html>
